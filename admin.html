@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Dashboard — ShopWave</title>
+  <link rel="stylesheet" href="pages.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{min-height:100vh;display:flex;flex-direction:column}
+    .admin-wrap{flex:1;padding:40px 0;background:var(--bg)}
+    .admin-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+    .admin-header-bar h1{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--navy)}
+    [data-theme="dark"] .admin-header-bar h1{color:var(--text)}
+    .stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:36px}
+    .stat-card{background:var(--card-bg);border-radius:var(--radius);padding:24px;border:1px solid var(--border);display:flex;align-items:center;gap:16px}
+    .stat-card-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+    .stat-card-icon.blue{background:#dbeafe}
+    .stat-card-icon.green{background:#d1fae5}
+    .stat-card-icon.orange{background:#ffedd5}
+    .stat-card-icon.purple{background:#ede9fe}
+    .stat-card-val{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--navy);line-height:1}
+    [data-theme="dark"] .stat-card-val{color:var(--text)}
+    .stat-card-label{font-size:13px;color:var(--text-muted);margin-top:4px}
+    .admin-section{background:var(--card-bg);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:28px;overflow:hidden}
+    .admin-section-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .admin-section-header h2{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--navy)}
+    [data-theme="dark"] .admin-section-header h2{color:var(--text)}
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border)}
+    .admin-table td{padding:14px 16px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border)}
+    .admin-table tr:last-child td{border-bottom:none}
+    .admin-table tr:hover td{background:var(--bg)}
+    .status-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase}
+    .status-confirmed{background:#dbeafe;color:#1d4ed8}
+    .status-packed{background:#fef3c7;color:#92400e}
+    .status-shipped{background:#ede9fe;color:#5b21b6}
+    .status-delivered{background:#d1fae5;color:#065f46}
+    .status-cancelled{background:#fee2e2;color:#991b1b}
+    .chart-wrap{padding:24px}
+    .chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px}
+    .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+    .chart-bar{width:100%;background:var(--orange);border-radius:4px 4px 0 0;min-height:4px;transition:height .5s ease}
+    .chart-bar-label{font-size:11px;color:var(--text-muted);text-align:center}
+    .chart-bar-val{font-size:11px;font-weight:700;color:var(--text)}
+    .status-select{font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text);cursor:pointer}
+    .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border)}
+    .tab-btn{padding:14px 20px;font-size:14px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:var(--transition)}
+    .tab-btn.active{color:var(--navy);border-bottom-color:var(--orange)}
+    [data-theme="dark"] .tab-btn.active{color:var(--text)}
+    .tab-panel{display:none;overflow-x:auto}
+    .tab-panel.active{display:block}
+    .access-denied{text-align:center;padding:80px 20px}
+    .access-denied .icon{font-size:64px;margin-bottom:20px}
+    .access-denied h2{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--navy);margin-bottom:10px}
+    [data-theme="dark"] .access-denied h2{color:var(--text)}
+    .access-denied p{color:var(--text-muted);margin-bottom:24px}
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <a href="/" class="logo"><span class="logo-icon">W</span><span class="logo-text">Shop<strong>Wave</strong></span></a>
+    <a href="/" class="back-link">← Back to Store</a>
+  </header>
+
+  <div class="admin-wrap">
+    <div class="container" id="adminContent">
+      <div style="text-align:center;padding:60px;color:var(--text-muted)">Loading…</div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <p>ShopWave Admin Dashboard &nbsp;|&nbsp; © 2025 ShopWave Technologies Pvt. Ltd.</p>
+  </footer>
+
+  <script>
+    const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+    async function api(method, url, body) {
+      const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+      if (body) opts.body = JSON.stringify(body);
+      const res = await fetch(url, opts);
+      return res.json();
+    }
+
+    function statusBadge(s) {
+      return `<span class="status-badge status-${s}">${s}</span>`;
+    }
+
+    async function updateStatus(orderId, select) {
+      const status = select.value;
+      await api('PUT', `/api/admin/orders/${orderId}/status`, { status });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+    }
+
+    async function loadDashboard() {
+      const me = await api('GET', '/api/auth/me');
+      if (!me.user || me.user.email !== 'admin@shopwave.com') {
+        document.getElementById('adminContent').innerHTML = `
+          <div class="access-denied">
+            <div class="icon">🔒</div>
+            <h2>Access Denied</h2>
+            <p>This page is only accessible to ShopWave administrators.</p>
+            <a href="/login.html" class="btn-primary">Sign In as Admin</a>
+          </div>`;
+        return;
+      }
+
+      const [stats, ordersData, usersData] = await Promise.all([
+        api('GET', '/api/admin/stats'),
+        api('GET', '/api/admin/orders'),
+        api('GET', '/api/admin/users'),
+      ]);
+
+      const orders = ordersData.orders || [];
+      const users  = usersData.users  || [];
+      const chart  = stats.chart || [];
+
+      // Build chart
+      const maxRev = Math.max(...chart.map(d => d.revenue), 1);
+      const chartHTML = chart.length ? chart.map(d => {
+        const h = Math.max(8, Math.round((d.revenue / maxRev) * 110));
+        const day = new Date(d.day).toLocaleDateString('en-IN', { weekday: 'short' });
+        return `<div class="chart-bar-wrap">
+          <div class="chart-bar-val">${d.cnt}</div>
+          <div class="chart-bar" style="height:${h}px" title="${fmt(d.revenue)}"></div>
+          <div class="chart-bar-label">${day}</div>
+        </div>`;
+      }).join('') : '<p style="color:var(--text-muted);font-size:14px;padding:20px">No orders in the last 7 days.</p>';
+
+      // Orders table
+      const ordersHTML = orders.length ? orders.slice(0, 50).map(o => `
+        <tr>
+          <td><strong>#${o.id}</strong></td>
+          <td>${o.user_name}<br><span style="font-size:11px;color:var(--text-muted)">${o.user_email}</span></td>
+          <td>${fmt(o.total)}</td>
+          <td>${statusBadge(o.status)}</td>
+          <td>${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+          <td>
+            <select class="status-select" onchange="updateStatus(${o.id},this)">
+              ${['confirmed','packed','shipped','delivered','cancelled'].map(s =>
+                `<option value="${s}" ${s===o.status?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`
+              ).join('')}
+            </select>
+          </td>
+        </tr>`).join('')
+        : '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">No orders yet.</td></tr>';
+
+      // Users table
+      const usersHTML = users.map(u => `
+        <tr>
+          <td><strong>#${u.id}</strong></td>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td>${u.phone || '—'}</td>
+          <td>${new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+        </tr>`).join('');
+
+      document.getElementById('adminContent').innerHTML = `
+        <div class="admin-header-bar">
+          <h1>📊 Admin Dashboard</h1>
+          <span style="font-size:13px;color:var(--text-muted)">Welcome, ${me.user.name}</span>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon blue">👥</div>
+            <div><div class="stat-card-val">${stats.users}</div><div class="stat-card-label">Total Users</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green">📦</div>
+            <div><div class="stat-card-val">${stats.orders}</div><div class="stat-card-label">Total Orders</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon orange">💰</div>
+            <div><div class="stat-card-val">${fmt(stats.revenue)}</div><div class="stat-card-label">Total Revenue</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple">🛍️</div>
+            <div><div class="stat-card-val">50</div><div class="stat-card-label">Products Listed</div></div>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-section-header"><h2>📈 Orders (Last 7 Days)</h2></div>
+          <div class="chart-wrap"><div class="chart-bars">${chartHTML}</div></div>
+        </div>
+
+        <div class="admin-section">
+          <div class="tab-bar">
+            <div class="tab-btn active" data-tab="orders" onclick="switchTab('orders')">📦 Orders (${orders.length})</div>
+            <div class="tab-btn" data-tab="users" onclick="switchTab('users')">👥 Users (${users.length})</div>
+          </div>
+          <div class="tab-panel active" id="tab-orders">
+            <table class="admin-table">
+              <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead>
+              <tbody>${ordersHTML}</tbody>
+            </table>
+          </div>
+          <div class="tab-panel" id="tab-users">
+            <table class="admin-table">
+              <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+              <tbody>${usersHTML}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

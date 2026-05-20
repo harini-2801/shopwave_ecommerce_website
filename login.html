@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopWave — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:#0F2040; --navy-mid:#1a3a6b; --orange:#FF6B35; --orange-dk:#e55b27;
+      --bg:#F5F7FA; --white:#fff; --text:#1A1A2E; --muted:#6B7280;
+      --border:#E5E7EB; --green:#10B981; --red:#EF4444;
+      --shadow-lg:0 20px 60px rgba(0,0,0,.18);
+      --font-display:'Syne',sans-serif; --font-body:'Plus Jakarta Sans',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
+    a{text-decoration:none;color:inherit}
+    button{cursor:pointer;border:none;font-family:inherit}
+    input{font-family:inherit}
+
+    /* ── HEADER ── */
+    .auth-header{background:var(--navy);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:8px}
+    .logo-icon{width:36px;height:36px;background:var(--orange);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:18px;box-shadow:0 4px 12px rgba(255,107,53,.4)}
+    .logo-text{font-family:var(--font-display);font-size:20px;color:#fff;letter-spacing:-.5px}
+    .logo-text strong{color:var(--orange)}
+    .back-link{color:#a8c4ff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:color .2s}
+    .back-link:hover{color:#fff}
+
+    /* ── MAIN ── */
+    .auth-main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+    .auth-card{background:#fff;border-radius:24px;box-shadow:var(--shadow-lg);width:100%;max-width:460px;overflow:hidden}
+
+    /* ── TABS ── */
+    .auth-tabs{display:flex;border-bottom:1px solid var(--border)}
+    .auth-tab{flex:1;padding:18px;font-size:15px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;font-family:var(--font-body)}
+    .auth-tab.active{color:var(--navy);border-bottom-color:var(--orange)}
+
+    /* ── FORM PANELS ── */
+    .auth-panel{display:none;padding:32px}
+    .auth-panel.active{display:block}
+    .auth-panel h2{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--navy);margin-bottom:6px}
+    .auth-panel p{font-size:14px;color:var(--muted);margin-bottom:28px}
+
+    /* ── FORM FIELDS ── */
+    .field{margin-bottom:18px}
+    .field label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:7px;letter-spacing:.2px}
+    .field-wrap{position:relative}
+    .field input{
+      width:100%;padding:13px 16px;border:1.5px solid var(--border);
+      border-radius:10px;font-size:14px;color:var(--text);
+      background:#fff;transition:border-color .2s,box-shadow .2s;outline:none;
+    }
+    .field input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,.15)}
+    .field input.error{border-color:var(--red)}
+    .field-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:18px;cursor:pointer;color:var(--muted)}
+    .field-error{font-size:12px;color:var(--red);margin-top:5px;display:none}
+    .field-error.show{display:block}
+
+    /* ── SUBMIT BTN ── */
+    .auth-btn{
+      width:100%;background:var(--orange);color:#fff;font-weight:800;
+      font-size:15px;padding:14px;border-radius:11px;
+      transition:all .2s;margin-top:8px;letter-spacing:.3px;
+    }
+    .auth-btn:hover{background:var(--orange-dk);transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,53,.4)}
+    .auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* ── DIVIDER ── */
+    .divider{display:flex;align-items:center;gap:12px;margin:22px 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .divider span{font-size:12px;color:var(--muted);font-weight:600}
+
+    /* ── SOCIAL BTNS ── */
+    .social-auth{display:flex;gap:10px}
+    .social-auth-btn{
+      flex:1;padding:11px;border:1.5px solid var(--border);border-radius:10px;
+      font-size:13px;font-weight:700;color:var(--text);background:#fff;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:all .2s;cursor:pointer;font-family:var(--font-body);
+    }
+    .social-auth-btn:hover{border-color:var(--navy);background:var(--bg)}
+
+    /* ── ALERT ── */
+    .auth-alert{
+      padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;
+      margin-bottom:20px;display:none;align-items:center;gap:8px;
+    }
+    .auth-alert.show{display:flex}
+    .auth-alert.success{background:#d1fae5;color:#065f46}
+    .auth-alert.error{background:#fee2e2;color:#991b1b}
+
+    /* ── FOOTER ── */
+    .auth-footer{text-align:center;padding:0 32px 28px;font-size:13px;color:var(--muted)}
+    .auth-footer a{color:var(--orange);font-weight:700}
+
+    /* ── STRENGTH BAR ── */
+    .strength-bar{height:4px;border-radius:2px;background:var(--border);margin-top:8px;overflow:hidden}
+    .strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+    .strength-label{font-size:11px;margin-top:4px;font-weight:600}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:480px){
+      .auth-panel{padding:24px 20px}
+      .auth-panel h2{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="auth-header">
+    <a href="ecomm.html" class="logo" aria-label="ShopWave Home">
+      <span class="logo-icon">W</span>
+      <span class="logo-text">Shop<strong>Wave</strong></span>
+    </a>
+    <a href="ecomm.html" class="back-link">← Back to Store</a>
+  </header>
+
+  <main class="auth-main">
+    <div class="auth-card">
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')"    role="tab" aria-selected="true">Sign In</button>
+        <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')" role="tab" aria-selected="false">Create Account</button>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="auth-panel active" id="panelLogin" role="tabpanel">
+        <h2>Welcome back 👋</h2>
+        <p>Sign in to your ShopWave account</p>
+
+        <div class="auth-alert" id="loginAlert"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="loginEmail">Email Address</label>
+            <div class="field-wrap">
+              <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required/>
+            </div>
+            <div class="field-error" id="loginEmailErr">Please enter a valid email</div>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <div class="field-wrap">
+              <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required/>
+              <span class="field-icon" onclick="togglePwd('loginPassword', this)">👁️</span>
+            </div>
+            <div class="field-error" id="loginPasswordErr">Password is required</div>
+          </div>
+          <button type="submit" class="auth-btn" id="loginBtn">Sign In →</button>
+        </form>
+
+        <div class="divider"><span>or continue with</span></div>
+        <div class="social-auth">
+          <button class="social-auth-btn" onclick="socialLogin('Google')">🌐 Google</button>
+          <button class="social-auth-btn" onclick="socialLogin('Facebook')">📘 Facebook</button>
+        </div>
+      </div>
+
+      <!-- ── REGISTER PANEL ── -->
+      <div class="auth-panel" id="panelRegister" role="tabpanel">
+        <h2>Join ShopWave ✨</h2>
+        <p>Create your free account and start shopping</p>
+
+        <div class="auth-alert" id="registerAlert"></div>
+
+        <form id="registerForm" novalidate>
+          <div class="field">
+            <label for="regName">Full Name</label>
+            <input type="text" id="regName" placeholder="John Doe" autocomplete="name" required/>
+            <div class="field-error" id="regNameErr">Please enter your name</div>
+          </div>
+          <div class="field">
+            <label for="regEmail">Email Address</label>
+            <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" required/>
+            <div class="field-error" id="regEmailErr">Please enter a valid email</div>
+          </div>
+          <div class="field">
+            <label for="regPhone">Phone Number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+            <input type="tel" id="regPhone" placeholder="+91 98765 43210" autocomplete="tel"/>
+          </div>
+          <div class="field">
+            <label for="regPassword">Password</label>
+            <div class="field-wrap">
+              <input type="password" id="regPassword" placeholder="Min. 6 characters" autocomplete="new-password" required oninput="checkStrength(this.value)"/>
+              <span class="field-icon" onclick="togglePwd('regPassword', this)">👁️</span>
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <div class="strength-label" id="strengthLabel" style="color:var(--muted)"></div>
+            <div class="field-error" id="regPasswordErr">Password must be at least 6 characters</div>
+          </div>
+          <button type="submit" class="auth-btn" id="registerBtn">Create Account →</button>
+        </form>
+
+        <div class="divider"><span>or continue with</span></div>
+        <div class="social-auth">
+          <button class="social-auth-btn" onclick="socialLogin('Google')">🌐 Google</button>
+          <button class="social-auth-btn" onclick="socialLogin('Facebook')">📘 Facebook</button>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        By continuing, you agree to ShopWave's
+        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ── TAB SWITCH ── */
+    function switchTab(tab) {
+      document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      document.getElementById('tabLogin').setAttribute('aria-selected', tab === 'login');
+      document.getElementById('tabRegister').setAttribute('aria-selected', tab === 'register');
+      clearAlerts();
+    }
+
+    /* ── TOGGLE PASSWORD VISIBILITY ── */
+    function togglePwd(id, icon) {
+      const inp = document.getElementById(id);
+      if (inp.type === 'password') { inp.type = 'text'; icon.textContent = '🙈'; }
+      else { inp.type = 'password'; icon.textContent = '👁️'; }
+    }
+
+    /* ── PASSWORD STRENGTH ── */
+    function checkStrength(val) {
+      const fill  = document.getElementById('strengthFill');
+      const label = document.getElementById('strengthLabel');
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const levels = [
+        { w:'0%',   c:'transparent', t:'' },
+        { w:'25%',  c:'#ef4444',     t:'Weak' },
+        { w:'50%',  c:'#f97316',     t:'Fair' },
+        { w:'75%',  c:'#eab308',     t:'Good' },
+        { w:'100%', c:'#10b981',     t:'Strong' },
+      ];
+      const l = levels[Math.min(score, 4)];
+      fill.style.width = l.w; fill.style.background = l.c;
+      label.textContent = l.t; label.style.color = l.c;
+    }
+
+    /* ── SHOW ALERT ── */
+    function showAlert(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+      el.className = 'auth-alert show ' + type;
+    }
+    function clearAlerts() {
+      ['loginAlert','registerAlert'].forEach(id => {
+        document.getElementById(id).className = 'auth-alert';
+      });
+    }
+
+    /* ── FIELD VALIDATION ── */
+    function validate(inputId, errId, condition) {
+      const inp = document.getElementById(inputId);
+      const err = document.getElementById(errId);
+      if (!condition) {
+        inp.classList.add('error');
+        err.classList.add('show');
+        return false;
+      }
+      inp.classList.remove('error');
+      err.classList.remove('show');
+      return true;
+    }
+
+    /* ── LOGIN ── */
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      let ok = true;
+      ok = validate('loginEmail',    'loginEmailErr',    emailRe.test(email))    && ok;
+      ok = validate('loginPassword', 'loginPasswordErr', password.length > 0)    && ok;
+      if (!ok) return;
+
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+
+      try {
+        const res  = await fetch('/api/auth/login', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showAlert('loginAlert', 'Signed in successfully! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'ecomm.html'; }, 1000);
+      } catch (err) {
+        showAlert('loginAlert', err.message, 'error');
+        btn.disabled = false; btn.textContent = 'Sign In →';
+      }
+    });
+
+    /* ── REGISTER ── */
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name     = document.getElementById('regName').value.trim();
+      const email    = document.getElementById('regEmail').value.trim();
+      const phone    = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const emailRe  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      let ok = true;
+      ok = validate('regName',     'regNameErr',     name.length > 0)          && ok;
+      ok = validate('regEmail',    'regEmailErr',    emailRe.test(email))       && ok;
+      ok = validate('regPassword', 'regPasswordErr', password.length >= 6)      && ok;
+      if (!ok) return;
+
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = true; btn.textContent = 'Creating account…';
+
+      try {
+        const res  = await fetch('/api/auth/register', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, phone })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showAlert('registerAlert', 'Account created! Redirecting…', 'success');
+        setTimeout(() => { window.location.href = 'ecomm.html'; }, 1000);
+      } catch (err) {
+        showAlert('registerAlert', err.message, 'error');
+        btn.disabled = false; btn.textContent = 'Create Account →';
+      }
+    });
+
+    /* ── SOCIAL LOGIN (placeholder) ── */
+    function socialLogin(provider) {
+      alert(provider + ' login coming soon! Please use email/password for now.');
+    }
+
+    /* ── AUTO-REDIRECT IF ALREADY LOGGED IN ── */
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => { if (d.user) window.location.href = 'ecomm.html'; })
+      .catch(() => {});
+
+    /* ── CHECK URL PARAM FOR TAB ── */
+    if (new URLSearchParams(location.search).get('tab') === 'register') {
+      switchTab('register');
+    }
+  </script>
+</body>
+</html>

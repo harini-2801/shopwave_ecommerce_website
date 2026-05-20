@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Checkout — ShopWave</title>
+  <link rel="stylesheet" href="pages.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body{min-height:100vh;display:flex;flex-direction:column}
+    .checkout-wrap{flex:1;padding:40px 0}
+    .checkout-grid{display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+    /* Steps */
+    .steps-bar{display:flex;align-items:center;margin-bottom:36px;gap:0}
+    .step{display:flex;align-items:center;gap:10px;flex:1}
+    .step-circle{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--text-muted);background:var(--card-bg);flex-shrink:0;transition:var(--transition)}
+    .step.active .step-circle{border-color:var(--orange);background:var(--orange);color:#fff}
+    .step.done .step-circle{border-color:var(--green);background:var(--green);color:#fff}
+    .step-label{font-size:13px;font-weight:600;color:var(--text-muted)}
+    .step.active .step-label,.step.done .step-label{color:var(--text)}
+    .step-line{flex:1;height:2px;background:var(--border);margin:0 8px}
+    .step-line.done{background:var(--green)}
+    /* Panels */
+    .checkout-panel{background:var(--card-bg);border-radius:var(--radius-lg);padding:32px;border:1px solid var(--border);display:none}
+    .checkout-panel.active{display:block}
+    .checkout-panel h2{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--navy);margin-bottom:24px}
+    [data-theme="dark"] .checkout-panel h2{color:var(--text)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    /* Payment */
+    .pay-option{display:flex;align-items:center;gap:14px;padding:16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:10px;transition:var(--transition)}
+    .pay-option:hover{border-color:var(--orange)}
+    .pay-option.selected{border-color:var(--orange);background:var(--orange-lt)}
+    .pay-option input[type=radio]{accent-color:var(--orange);width:18px;height:18px}
+    .pay-option-label{font-weight:600;font-size:14px;color:var(--text)}
+    .pay-option-sub{font-size:12px;color:var(--text-muted)}
+    .card-fields{background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-top:10px;display:none}
+    /* Order summary */
+    .summary-box{background:var(--card-bg);border-radius:var(--radius-lg);padding:28px;border:1px solid var(--border);position:sticky;top:80px}
+    .summary-box h3{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--navy);margin-bottom:20px}
+    [data-theme="dark"] .summary-box h3{color:var(--text)}
+    .summary-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center}
+    .summary-item-emoji{font-size:28px;width:44px;height:44px;background:var(--bg);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .summary-item-name{font-size:13px;font-weight:600;color:var(--text);flex:1;line-height:1.4}
+    .summary-item-price{font-size:13px;font-weight:800;color:var(--navy);flex-shrink:0}
+    [data-theme="dark"] .summary-item-price{color:var(--text)}
+    .summary-row{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;color:var(--text-muted)}
+    .summary-row.total{font-size:18px;font-weight:800;color:var(--navy);border-top:1px solid var(--border);margin-top:8px;padding-top:14px}
+    [data-theme="dark"] .summary-row.total{color:var(--text)}
+    .coupon-row{display:flex;gap:8px;margin:12px 0}
+    .coupon-row input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--card-bg);outline:none}
+    .coupon-row input:focus{border-color:var(--orange)}
+    .coupon-row button{background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:8px;white-space:nowrap;transition:var(--transition)}
+    .coupon-row button:hover{background:var(--orange)}
+    .coupon-msg{font-size:12px;font-weight:600;margin-top:4px}
+    .coupon-msg.ok{color:var(--green)}
+    .coupon-msg.err{color:var(--red)}
+    /* Confirmation */
+    .confirm-screen{text-align:center;padding:40px 20px}
+    .confirm-icon{font-size:80px;margin-bottom:20px;animation:bounce .6s ease}
+    @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+    .confirm-screen h2{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--navy);margin-bottom:10px}
+    [data-theme="dark"] .confirm-screen h2{color:var(--text)}
+    .confirm-screen p{color:var(--text-muted);font-size:15px;margin-bottom:6px}
+    .confirm-order-id{font-size:20px;font-weight:800;color:var(--orange);margin:16px 0}
+    .confirm-actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+    /* Nav buttons */
+    .checkout-nav{display:flex;justify-content:space-between;margin-top:28px;gap:12px}
+    @media(max-width:900px){.checkout-grid{grid-template-columns:1fr}.summary-box{position:static}}
+    @media(max-width:600px){.form-row{grid-template-columns:1fr}.steps-bar .step-label{display:none}}
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <a href="/" class="logo"><span class="logo-icon">W</span><span class="logo-text">Shop<strong>Wave</strong></span></a>
+    <a href="/" class="back-link">← Continue Shopping</a>
+  </header>
+
+  <div class="checkout-wrap">
+    <div class="container">
+      <!-- Steps bar -->
+      <div class="steps-bar" id="stepsBar">
+        <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">Address</div></div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">Payment</div></div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">Review</div></div>
+        <div class="step-line" id="line3"></div>
+        <div class="step" id="step4"><div class="step-circle">✓</div><div class="step-label">Confirmed</div></div>
+      </div>
+
+      <div class="checkout-grid">
+        <div>
+          <!-- Step 1: Address -->
+          <div class="checkout-panel active" id="panel1">
+            <h2>📍 Delivery Address</h2>
+            <div class="form-row">
+              <div class="field"><label>Full Name *</label><input type="text" id="addrName" placeholder="Recipient's full name"/></div>
+              <div class="field"><label>Phone Number *</label><input type="tel" id="addrPhone" placeholder="+91 98765 43210"/></div>
+            </div>
+            <div class="field"><label>Address Line 1 *</label><input type="text" id="addrLine1" placeholder="House/Flat no., Street, Area"/></div>
+            <div class="field"><label>Address Line 2</label><input type="text" id="addrLine2" placeholder="Landmark (optional)"/></div>
+            <div class="form-row">
+              <div class="field"><label>City *</label><input type="text" id="addrCity" placeholder="City"/></div>
+              <div class="field"><label>State *</label>
+                <select id="addrState">
+                  <option value="">Select State</option>
+                  <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option>
+                  <option>Delhi</option><option>Goa</option><option>Gujarat</option>
+                  <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                  <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                  <option>Maharashtra</option><option>Odisha</option><option>Punjab</option>
+                  <option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option>
+                  <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label>Pincode *</label><input type="text" id="addrPin" placeholder="6-digit pincode" maxlength="6"/></div>
+              <div class="field"><label>Address Type</label>
+                <select id="addrType"><option>Home</option><option>Work</option><option>Other</option></select>
+              </div>
+            </div>
+            <div class="checkout-nav">
+              <span></span>
+              <button class="btn-primary" onclick="goStep(2)">Continue to Payment →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Payment -->
+          <div class="checkout-panel" id="panel2">
+            <h2>💳 Payment Method</h2>
+            <div class="pay-option selected" onclick="selectPay(this,'upi')">
+              <input type="radio" name="pay" value="upi" checked/>
+              <div><div class="pay-option-label">📱 UPI</div><div class="pay-option-sub">GPay, PhonePe, Paytm, BHIM</div></div>
+            </div>
+            <div class="pay-option" onclick="selectPay(this,'card')">
+              <input type="radio" name="pay" value="card"/>
+              <div><div class="pay-option-label">💳 Credit / Debit Card</div><div class="pay-option-sub">Visa, Mastercard, RuPay</div></div>
+            </div>
+            <div class="card-fields" id="cardFields">
+              <div class="field"><label>Card Number</label><input type="text" placeholder="1234 5678 9012 3456" maxlength="19"/></div>
+              <div class="form-row">
+                <div class="field"><label>Expiry</label><input type="text" placeholder="MM/YY" maxlength="5"/></div>
+                <div class="field"><label>CVV</label><input type="text" placeholder="123" maxlength="3"/></div>
+              </div>
+              <div class="field"><label>Name on Card</label><input type="text" placeholder="As printed on card"/></div>
+            </div>
+            <div class="pay-option" onclick="selectPay(this,'netbanking')">
+              <input type="radio" name="pay" value="netbanking"/>
+              <div><div class="pay-option-label">🏦 Net Banking</div><div class="pay-option-sub">All major banks supported</div></div>
+            </div>
+            <div class="pay-option" onclick="selectPay(this,'emi')">
+              <input type="radio" name="pay" value="emi"/>
+              <div><div class="pay-option-label">📅 EMI</div><div class="pay-option-sub">No-cost EMI on orders above ₹3,000</div></div>
+            </div>
+            <div class="pay-option" onclick="selectPay(this,'cod')">
+              <input type="radio" name="pay" value="cod"/>
+              <div><div class="pay-option-label">💵 Cash on Delivery</div><div class="pay-option-sub">Pay when your order arrives</div></div>
+            </div>
+            <div class="checkout-nav">
+              <button class="btn-outline" onclick="goStep(1)">← Back</button>
+              <button class="btn-primary" onclick="goStep(3)">Review Order →</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Review -->
+          <div class="checkout-panel" id="panel3">
+            <h2>📋 Review Your Order</h2>
+            <div id="reviewAddress" style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;font-size:14px;color:var(--text-muted)"></div>
+            <div id="reviewPayment" style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;font-size:14px;color:var(--text-muted)"></div>
+            <div id="reviewItems"></div>
+            <div class="checkout-nav">
+              <button class="btn-outline" onclick="goStep(2)">← Back</button>
+              <button class="btn-primary" id="placeOrderBtn" onclick="placeOrder()">Place Order →</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Confirmation -->
+          <div class="checkout-panel" id="panel4">
+            <div class="confirm-screen">
+              <div class="confirm-icon">🎉</div>
+              <h2>Order Placed Successfully!</h2>
+              <p>Thank you for shopping with ShopWave.</p>
+              <div class="confirm-order-id" id="confirmOrderId">Order #—</div>
+              <p style="font-size:13px">You'll receive a confirmation email shortly. Track your order anytime.</p>
+              <div class="confirm-actions">
+                <a href="/tracking.html" class="btn-primary">Track Order</a>
+                <a href="/" class="btn-outline">Continue Shopping</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="summary-box" id="summaryBox">
+          <h3>Order Summary</h3>
+          <div id="summaryItems"></div>
+          <div style="margin-top:16px">
+            <div class="coupon-row">
+              <input type="text" id="couponInput" placeholder="Coupon code" style="text-transform:uppercase"/>
+              <button onclick="applyCoupon()">Apply</button>
+            </div>
+            <div class="coupon-msg" id="couponMsg"></div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₹0</span></div>
+            <div class="summary-row"><span>Delivery</span><span style="color:var(--green);font-weight:700">FREE</span></div>
+            <div class="summary-row" id="discountRow" style="display:none;color:var(--green)"><span>Discount</span><span id="discountAmt"></span></div>
+            <div class="summary-row total"><span>Total</span><span id="summaryTotal">₹0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <p>🔒 Secure Checkout &nbsp;|&nbsp; © 2025 ShopWave Technologies Pvt. Ltd.</p>
+  </footer>
+
+  <script src="products.js"></script>
+  <script>
+    const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+    let cart = JSON.parse(localStorage.getItem('sw_cart') || '[]');
+    let selectedPayment = 'upi';
+    let couponDiscount  = 0;
+    let couponCode      = '';
+    let currentStep     = 1;
+
+    // Redirect if cart empty or not logged in
+    async function init() {
+      if (!cart.length) { window.location.href = '/'; return; }
+      try {
+        const me = await fetch('/api/auth/me', { credentials: 'include' }).then(r => r.json());
+        if (!me.user) { window.location.href = '/login.html?redirect=checkout'; return; }
+      } catch (e) {}
+      renderSummary();
+    }
+
+    function renderSummary() {
+      let subtotal = 0;
+      const items = cart.map(item => {
+        const p = PRODUCTS.find(x => x.id === item.id);
+        if (!p) return '';
+        const line = p.price * item.qty;
+        subtotal += line;
+        return `<div class="summary-item">
+          <div class="summary-item-emoji">${p.emoji}</div>
+          <div class="summary-item-name">${p.name}<br><span style="color:var(--text-muted);font-size:12px">Qty: ${item.qty}</span></div>
+          <div class="summary-item-price">${fmt(line)}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('summaryItems').innerHTML = items;
+      document.getElementById('summarySubtotal').textContent = fmt(subtotal);
+      const total = Math.max(0, subtotal - couponDiscount);
+      document.getElementById('summaryTotal').textContent = fmt(total);
+      if (couponDiscount > 0) {
+        document.getElementById('discountRow').style.display = 'flex';
+        document.getElementById('discountAmt').textContent = '−' + fmt(couponDiscount);
+      }
+    }
+
+    function getSubtotal() {
+      return cart.reduce((s, item) => {
+        const p = PRODUCTS.find(x => x.id === item.id);
+        return s + (p ? p.price * item.qty : 0);
+      }, 0);
+    }
+
+    async function applyCoupon() {
+      const code = document.getElementById('couponInput').value.trim().toUpperCase();
+      const msg  = document.getElementById('couponMsg');
+      if (!code) { msg.textContent = 'Enter a coupon code'; msg.className = 'coupon-msg err'; return; }
+      try {
+        const data = await fetch('/api/coupons/validate', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, cartTotal: getSubtotal() })
+        }).then(r => r.json());
+        if (data.valid) {
+          couponDiscount = data.discount;
+          couponCode     = code;
+          msg.textContent = '✅ ' + data.message;
+          msg.className   = 'coupon-msg ok';
+          renderSummary();
+        } else {
+          couponDiscount = 0; couponCode = '';
+          msg.textContent = '❌ ' + data.message;
+          msg.className   = 'coupon-msg err';
+          renderSummary();
+        }
+      } catch (e) { msg.textContent = 'Could not validate coupon'; msg.className = 'coupon-msg err'; }
+    }
+
+    function selectPay(el, val) {
+      document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      el.querySelector('input').checked = true;
+      selectedPayment = val;
+      document.getElementById('cardFields').style.display = val === 'card' ? 'block' : 'none';
+    }
+
+    function goStep(n) {
+      if (n === 2) {
+        const name  = document.getElementById('addrName').value.trim();
+        const phone = document.getElementById('addrPhone').value.trim();
+        const line1 = document.getElementById('addrLine1').value.trim();
+        const city  = document.getElementById('addrCity').value.trim();
+        const state = document.getElementById('addrState').value;
+        const pin   = document.getElementById('addrPin').value.trim();
+        if (!name || !phone || !line1 || !city || !state || !pin) {
+          alert('Please fill in all required address fields.'); return;
+        }
+        if (!/^\d{6}$/.test(pin)) { alert('Please enter a valid 6-digit pincode.'); return; }
+      }
+      if (n === 3) {
+        const addr = getAddress();
+        document.getElementById('reviewAddress').innerHTML =
+          `<strong>📍 Delivery to:</strong><br>${addr.name} · ${addr.phone}<br>${addr.line1}${addr.line2 ? ', ' + addr.line2 : ''}<br>${addr.city}, ${addr.state} — ${addr.pincode}`;
+        const payLabels = { upi:'📱 UPI', card:'💳 Credit/Debit Card', netbanking:'🏦 Net Banking', emi:'📅 EMI', cod:'💵 Cash on Delivery' };
+        document.getElementById('reviewPayment').innerHTML = `<strong>💳 Payment:</strong> ${payLabels[selectedPayment] || selectedPayment}`;
+        const items = cart.map(item => {
+          const p = PRODUCTS.find(x => x.id === item.id);
+          if (!p) return '';
+          return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px"><span>${p.emoji} ${p.name} × ${item.qty}</span><span style="font-weight:700">${fmt(p.price * item.qty)}</span></div>`;
+        }).join('');
+        document.getElementById('reviewItems').innerHTML = items;
+      }
+      // Update step indicators
+      for (let i = 1; i <= 4; i++) {
+        const s = document.getElementById('step' + i);
+        s.classList.remove('active', 'done');
+        if (i < n) s.classList.add('done');
+        if (i === n) s.classList.add('active');
+        if (i < 4) {
+          const l = document.getElementById('line' + i);
+          l.classList.toggle('done', i < n);
+        }
+      }
+      document.querySelectorAll('.checkout-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel' + n).classList.add('active');
+      currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getAddress() {
+      return {
+        name:    document.getElementById('addrName').value.trim(),
+        phone:   document.getElementById('addrPhone').value.trim(),
+        line1:   document.getElementById('addrLine1').value.trim(),
+        line2:   document.getElementById('addrLine2').value.trim(),
+        city:    document.getElementById('addrCity').value.trim(),
+        state:   document.getElementById('addrState').value,
+        pincode: document.getElementById('addrPin').value.trim(),
+        type:    document.getElementById('addrType').value,
+      };
+    }
+
+    async function placeOrder() {
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true; btn.textContent = 'Placing order…';
+      const items = cart.map(item => {
+        const p = PRODUCTS.find(x => x.id === item.id);
+        return { id: item.id, name: p?.name || 'Product', price: p?.price || 0, qty: item.qty };
+      });
+      const subtotal = getSubtotal();
+      const total    = Math.max(0, subtotal - couponDiscount);
+      try {
+        const data = await fetch('/api/orders', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, total, address: getAddress(), payment: selectedPayment, coupon: couponCode || undefined })
+        }).then(r => r.json());
+        if (data.success) {
+          localStorage.setItem('sw_cart', '[]');
+          document.getElementById('confirmOrderId').textContent = 'Order #' + data.orderId;
+          goStep(4);
+          document.getElementById('summaryBox').style.display = 'none';
+          document.getElementById('stepsBar').style.display = 'none';
+        } else {
+          alert('Error: ' + (data.error || 'Could not place order'));
+          btn.disabled = false; btn.textContent = 'Place Order →';
+        }
+      } catch (e) {
+        alert('Server error. Please try again.');
+        btn.disabled = false; btn.textContent = 'Place Order →';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

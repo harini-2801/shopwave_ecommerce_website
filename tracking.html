@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Order Tracking — ShopWave</title>
+  <link rel="stylesheet" href="pages.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    .track-box{max-width:600px;margin:0 auto;background:var(--card-bg);border-radius:var(--radius-lg);padding:40px;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+    .track-box h2{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--navy);margin-bottom:8px}
+    [data-theme="dark"] .track-box h2{color:var(--text)}
+    .track-box p{color:var(--text-muted);margin-bottom:28px;font-size:14px}
+    .track-input-row{display:flex;gap:10px}
+    .track-input-row input{flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card-bg);outline:none;transition:border-color .2s}
+    .track-input-row input:focus{border-color:var(--orange)}
+    .order-result{margin-top:32px;display:none}
+    .order-card{background:var(--bg);border-radius:var(--radius);padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+    .order-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+    .order-id{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--navy)}
+    [data-theme="dark"] .order-id{color:var(--text)}
+    .order-status-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase}
+    .status-confirmed{background:#dbeafe;color:#1d4ed8}
+    .status-packed{background:#fef3c7;color:#92400e}
+    .status-shipped{background:#ede9fe;color:#5b21b6}
+    .status-delivered{background:#d1fae5;color:#065f46}
+    .status-cancelled{background:#fee2e2;color:#991b1b}
+    .order-date{font-size:12px;color:var(--text-muted);margin-bottom:14px}
+    .order-items-list{margin-bottom:14px}
+    .order-item-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+    .order-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:15px;color:var(--navy);margin-top:10px}
+    [data-theme="dark"] .order-total-row{color:var(--text)}
+    .track-steps{margin-top:20px}
+    .track-steps h4{font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+    .no-orders{text-align:center;padding:40px 20px;color:var(--text-muted)}
+    .no-orders .icon{font-size:56px;margin-bottom:16px;opacity:.4}
+    .divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+    .my-orders-section{margin-top:32px;display:none}
+    .my-orders-section h3{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--navy);margin-bottom:16px}
+    [data-theme="dark"] .my-orders-section h3{color:var(--text)}
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <a href="/" class="logo"><span class="logo-icon">W</span><span class="logo-text">Shop<strong>Wave</strong></span></a>
+    <a href="/" class="back-link">← Back to Store</a>
+  </header>
+
+  <div class="page-hero" style="padding:56px 24px">
+    <h1>Track Your <span>Order</span></h1>
+    <p>Enter your order ID to get real-time updates on your delivery.</p>
+  </div>
+
+  <section class="section-pad" style="background:var(--bg)">
+    <div class="container">
+      <div class="track-box">
+        <h2>🔍 Track Order</h2>
+        <p>Enter your Order ID (e.g. #42) to see the current status and delivery timeline.</p>
+        <div class="track-input-row">
+          <input type="text" id="trackInput" placeholder="Enter Order ID (e.g. 42)" onkeydown="if(event.key==='Enter')trackOrder()"/>
+          <button class="btn-primary" onclick="trackOrder()">Track</button>
+        </div>
+        <div id="trackResult" class="order-result"></div>
+
+        <hr class="divider"/>
+
+        <div class="my-orders-section" id="myOrdersSection">
+          <h3>📦 Your Recent Orders</h3>
+          <div id="myOrdersList"></div>
+        </div>
+        <div id="loginPrompt" style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:14px">
+          <a href="/login.html" style="color:var(--orange);font-weight:700">Sign in</a> to see all your orders automatically.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    <p>© 2025 ShopWave Technologies Pvt. Ltd. &nbsp;|&nbsp; <a href="/help.html">Help Center</a> &nbsp;|&nbsp; <a href="/returns.html">Returns</a></p>
+  </footer>
+
+  <script>
+    const STATUS_STEPS = {
+      confirmed: 1, packed: 2, shipped: 3, delivered: 4, cancelled: 0
+    };
+
+    function statusBadge(status) {
+      return `<span class="order-status-badge status-${status}">${status}</span>`;
+    }
+
+    function renderTimeline(status) {
+      const step = STATUS_STEPS[status] || 0;
+      if (status === 'cancelled') return `<div style="color:var(--red);font-weight:600;font-size:14px;margin-top:12px">❌ This order was cancelled.</div>`;
+      const steps = [
+        { label: 'Order Confirmed', sub: 'Your order has been placed', icon: '✅' },
+        { label: 'Packed',          sub: 'Your items are being packed', icon: '📦' },
+        { label: 'Shipped',         sub: 'Out for delivery',            icon: '🚚' },
+        { label: 'Delivered',       sub: 'Delivered to your address',   icon: '🏠' },
+      ];
+      return `<div class="track-steps"><h4>Delivery Status</h4><div class="timeline">
+        ${steps.map((s, i) => `
+          <div class="timeline-item ${i < step ? 'done' : ''} ${i === step - 1 ? 'active' : ''}">
+            <div class="timeline-label">${s.icon} ${s.label}</div>
+            <div class="timeline-sub">${s.sub}</div>
+          </div>`).join('')}
+      </div></div>`;
+    }
+
+    function renderOrder(o) {
+      const itemsHTML = o.items.map(i =>
+        `<div class="order-item-row"><span>${i.product_name} × ${i.qty}</span><span>₹${(i.price*i.qty).toLocaleString('en-IN')}</span></div>`
+      ).join('');
+      return `<div class="order-card">
+        <div class="order-card-header">
+          <span class="order-id">Order #${o.id}</span>
+          ${statusBadge(o.status)}
+        </div>
+        <div class="order-date">Placed on ${new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+        <div class="order-items-list">${itemsHTML}</div>
+        <div class="order-total-row"><span>Total</span><span>₹${o.total.toLocaleString('en-IN')}</span></div>
+        ${renderTimeline(o.status)}
+      </div>`;
+    }
+
+    async function trackOrder() {
+      const id  = document.getElementById('trackInput').value.trim();
+      const res = document.getElementById('trackResult');
+      if (!id) { res.style.display = 'block'; res.innerHTML = '<p style="color:var(--red)">Please enter an Order ID.</p>'; return; }
+      res.style.display = 'block';
+      res.innerHTML = '<p style="color:var(--text-muted)">Looking up order…</p>';
+      try {
+        const data = await fetch(`/api/orders/${id}`, { credentials: 'include' }).then(r => r.json());
+        if (data.order) {
+          res.innerHTML = renderOrder(data.order);
+        } else {
+          res.innerHTML = `<div class="no-orders"><div class="icon">📦</div><p>No order found with ID #${id}.<br>Please check the order ID and try again.</p></div>`;
+        }
+      } catch (e) {
+        res.innerHTML = '<p style="color:var(--red)">Could not fetch order. Please try again.</p>';
+      }
+    }
+
+    // Load user's orders if logged in
+    async function loadMyOrders() {
+      try {
+        const me = await fetch('/api/auth/me', { credentials: 'include' }).then(r => r.json());
+        if (!me.user) return;
+        document.getElementById('loginPrompt').style.display = 'none';
+        document.getElementById('myOrdersSection').style.display = 'block';
+        const data = await fetch('/api/orders', { credentials: 'include' }).then(r => r.json());
+        const list = document.getElementById('myOrdersList');
+        if (!data.orders?.length) {
+          list.innerHTML = '<div class="no-orders"><div class="icon">📦</div><p>No orders yet. <a href="/" style="color:var(--orange);font-weight:700">Start shopping!</a></p></div>';
+        } else {
+          list.innerHTML = data.orders.slice(0, 5).map(renderOrder).join('');
+        }
+      } catch (e) {}
+    }
+    loadMyOrders();
+  </script>
+</body>
+</html>

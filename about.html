@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>About Us — ShopWave</title>
+  <link rel="stylesheet" href="pages.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    .mission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+    .mission-card{background:var(--card-bg);border-radius:var(--radius-lg);padding:36px 28px;text-align:center;border:1px solid var(--border);transition:var(--transition)}
+    .mission-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+    .mission-icon{font-size:48px;margin-bottom:16px}
+    .mission-card h3{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--navy);margin-bottom:10px}
+    [data-theme="dark"] .mission-card h3{color:var(--text)}
+    .mission-card p{font-size:14px;color:var(--text-muted);line-height:1.7}
+    .story-section{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+    .story-visual{background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:var(--radius-lg);height:360px;display:flex;align-items:center;justify-content:center;font-size:100px}
+    .story-text h2{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--navy);margin-bottom:20px;line-height:1.2}
+    [data-theme="dark"] .story-text h2{color:var(--text)}
+    .story-text h2 span{color:var(--orange)}
+    .story-text p{color:var(--text-muted);font-size:15px;line-height:1.8;margin-bottom:16px}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+    .team-card{background:var(--card-bg);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;border:1px solid var(--border);transition:var(--transition)}
+    .team-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .team-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;font-family:var(--font-display)}
+    .team-card h4{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px}
+    [data-theme="dark"] .team-card h4{color:var(--text)}
+    .team-card .role{font-size:13px;color:var(--orange);font-weight:600;margin-bottom:10px}
+    .team-card p{font-size:13px;color:var(--text-muted);line-height:1.6}
+    @media(max-width:768px){.story-section{grid-template-columns:1fr}.story-visual{height:200px;font-size:60px}}
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <a href="/" class="logo"><span class="logo-icon">W</span><span class="logo-text">Shop<strong>Wave</strong></span></a>
+    <a href="/" class="back-link">← Back to Store</a>
+  </header>
+
+  <div class="page-hero">
+    <h1>About <span>ShopWave</span></h1>
+    <p>We're on a mission to make quality shopping accessible to everyone, everywhere in India.</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-num">10M+</div><div class="stat-label">Happy Customers</div></div>
+      <div class="stat-item"><div class="stat-num">50K+</div><div class="stat-label">Products Listed</div></div>
+      <div class="stat-item"><div class="stat-num">100+</div><div class="stat-label">Cities Served</div></div>
+      <div class="stat-item"><div class="stat-num">5000+</div><div class="stat-label">Seller Partners</div></div>
+    </div>
+  </div>
+
+  <section class="section-pad" style="background:var(--bg)">
+    <div class="container">
+      <div class="story-section">
+        <div class="story-visual">🛍️</div>
+        <div class="story-text">
+          <h2>Our <span>Story</span></h2>
+          <p>ShopWave was founded in 2019 with a simple belief — every Indian deserves access to quality products at fair prices, delivered right to their doorstep.</p>
+          <p>What started as a small electronics marketplace in Bengaluru has grown into one of India's fastest-growing multi-category ecommerce platforms, serving customers across 100+ cities.</p>
+          <p>Today, we partner with thousands of sellers, brands and manufacturers to bring you the widest selection of authentic products — from the latest smartphones to fresh groceries — all under one roof.</p>
+          <a href="/" class="btn-primary" style="margin-top:8px">Start Shopping</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad" style="background:var(--white)">
+    <div class="container">
+      <div class="section-header">
+        <h2>Our Mission & Values</h2>
+        <p>The principles that guide everything we do</p>
+      </div>
+      <div class="mission-grid">
+        <div class="mission-card">
+          <div class="mission-icon">🎯</div>
+          <h3>Customer First</h3>
+          <p>Every decision we make starts with one question: is this good for our customers? We obsess over your experience from browsing to delivery.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon">🏆</div>
+          <h3>100% Authentic</h3>
+          <p>We guarantee every product sold on ShopWave is genuine. Our strict seller verification and quality checks ensure you always get what you pay for.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon">⚡</div>
+          <h3>Speed & Reliability</h3>
+          <p>Fast delivery isn't a luxury — it's a promise. We've built a logistics network that gets your orders to you faster than anyone else.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon">🌱</div>
+          <h3>Sustainability</h3>
+          <p>We're committed to reducing our environmental footprint through eco-friendly packaging, carbon-neutral deliveries, and responsible sourcing.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon">🤝</div>
+          <h3>Seller Empowerment</h3>
+          <p>We believe in growing together. Our platform gives small businesses and artisans the tools to reach millions of customers across India.</p>
+        </div>
+        <div class="mission-card">
+          <div class="mission-icon">🔒</div>
+          <h3>Trust & Safety</h3>
+          <p>Your data and money are safe with us. We use bank-grade encryption and never share your personal information with third parties.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad" style="background:var(--bg)">
+    <div class="container">
+      <div class="section-header">
+        <h2>Meet the Team</h2>
+        <p>The people building ShopWave every day</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#FF6B35,#e55b27)">A</div>
+          <h4>Arjun Mehta</h4>
+          <div class="role">Co-Founder & CEO</div>
+          <p>Former IIT Bombay grad with 10+ years in ecommerce. Passionate about building products that matter.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#0F2040,#1a3a6b)">P</div>
+          <h4>Priya Sharma</h4>
+          <div class="role">Co-Founder & CTO</div>
+          <p>Full-stack engineer turned entrepreneur. Leads our 200+ person engineering team with a focus on scale.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">R</div>
+          <h4>Rahul Gupta</h4>
+          <div class="role">Head of Operations</div>
+          <p>Supply chain expert who built our logistics network from scratch. Obsessed with on-time delivery.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">S</div>
+          <h4>Sneha Iyer</h4>
+          <div class="role">Head of Design</div>
+          <p>Award-winning UX designer who believes great design should be invisible. Makes ShopWave beautiful.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    <p>© 2025 ShopWave Technologies Pvt. Ltd. &nbsp;|&nbsp; <a href="/about.html">About</a> &nbsp;|&nbsp; <a href="/careers.html">Careers</a> &nbsp;|&nbsp; <a href="/help.html">Help</a></p>
+  </footer>
+</body>
+</html>
